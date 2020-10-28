@@ -9,9 +9,9 @@ uid = 0
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def reqGuardList(roomid, page):
+def reqGuardList(page):
     res = requests.get("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList", {
-        "roomid" : roomid,
+        "roomid" : room_id,
         "page" : page,
         "ruid" : uid,
         "page_size" : 29
@@ -20,7 +20,7 @@ def reqGuardList(roomid, page):
     return res.json()
 
 def storeData(li):
-    with open(os.path.join(dir_path, "guardian.csv"), 'a', encoding='utf-8', newline='') as f:
+    with open(os.path.join(dir_path, "{roomid}_guardian.csv".format(roomid = room_id)), 'a', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, delimiter = ",", 
             fieldnames = ["uid", "名字", "排名", "舰长等级", "粉丝牌等级"])
         for guard in li:
@@ -41,7 +41,7 @@ def guardLevelConvert(guard_level):
     }
     return level.get(guard_level)
 
-data = reqGuardList(room_id, 1)
+data = reqGuardList(1)
 total_page = data["data"]["info"]["page"]
 
 with open(os.path.join(dir_path, "{roomid}_guardian.csv".format(roomid = room_id)), 'w', encoding='utf-8', newline='') as f:
@@ -65,5 +65,5 @@ storeData(data["data"]["list"])
 for i in range(2, total_page + 1):
     time.sleep(5)
     print("当前第{page}页".format(page = i))
-    data = reqGuardList(room_id, i)
+    data = reqGuardList(i)
     storeData(data["data"]["list"])
