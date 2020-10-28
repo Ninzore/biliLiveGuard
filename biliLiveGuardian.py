@@ -3,16 +3,17 @@ import csv
 import time
 import requests
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+# 这地方填房间号和uid
+room_id = 0
+uid = 0
 
-# 这个地方写房间号
-target_room_id = 0
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def reqGuardList(roomid, page):
     res = requests.get("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList", {
         "roomid" : roomid,
         "page" : page,
-        "ruid" : 434662713,
+        "ruid" : uid,
         "page_size" : 29
     })
     res.encoding = "utf-8"
@@ -40,10 +41,10 @@ def guardLevelConvert(guard_level):
     }
     return level.get(guard_level)
 
-data = reqGuardList(target_room_id, 1)
+data = reqGuardList(room_id, 1)
 total_page = data["data"]["info"]["page"]
 
-with open(os.path.join(dir_path, "guardian.csv"), 'w', encoding='utf-8', newline='') as f:
+with open(os.path.join(dir_path, "{roomid}_guardian.csv".format(roomid = room_id)), 'w', encoding='utf-8', newline='') as f:
     writer = csv.DictWriter(f, delimiter = ",", 
         fieldnames = ["uid", "名字", "排名", "舰长等级", "粉丝牌等级"])
     writer.writeheader()
@@ -64,5 +65,5 @@ storeData(data["data"]["list"])
 for i in range(2, total_page + 1):
     time.sleep(5)
     print("当前第{page}页".format(page = i))
-    data = reqGuardList(target_room_id, i)
+    data = reqGuardList(room_id, i)
     storeData(data["data"]["list"])
